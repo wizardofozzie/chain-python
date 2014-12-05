@@ -4,7 +4,8 @@ Chain's official Python SDK.
 
 ## Quick Start
 
-```from chain import Chain
+```python
+from chain import Chain
 chainClient = Chain(keyID='5587496846848', 
                     keySecret='09sdgo8990g0gdsas9d98d8a8h',
                     blockChain='bitcoin')
