@@ -1,6 +1,8 @@
 import json
 
-from shared import request
+from bitcoin.core.key import CECKey
+
+from shared import request, generateKeyCollection, convertPrivateKeysToBinaryFormat
 from chain import APIVersion
 
 
@@ -105,5 +107,46 @@ class Chain:
             # The user specified neither a hash or a height. Let's give them the latest block.
             URI = "https://" + self.keyID + ":" + self.keySecret + "@api.chain.com/" + APIVersion + "/" + self.blockChain + "/blocks/latest/op-returns"
         returnedData = request(URI)
+        return json.loads(returnedData)
+    
+    def build(self,template):
+        URI = "https://" + self.keyID + ":" + self.keySecret + "@api.chain.com/" + APIVersion + "/" + self.blockChain + "/transactions/build"
+        templateString = json.dumps(template)
+        returnedData = request(URI, data=templateString, operation='POST')
+        return json.loads(returnedData)
+    
+    def sign(self,template, privateKeys):
+        # convert all of the privateKeys to a standard binary format for us to work with
+        privateKeysBinary = convertPrivateKeysToBinaryFormat(privateKeys, self.blockChain)
+        
+        # keyCollection is a dictionary where the key of the dict is an address and the value is a 
+        # tuple with (privKey, compressed)
+        #     where privKey is the key in binary format
+        #     and compressed is whether or not the corresponding pubkey should be compressed
+        keyCollection = generateKeyCollection(privateKeysBinary, self.blockChain) 
+        
+        if not 'inputs' in template:
+            raise Exception("This template has no inputs. There is nothing so sign.")
+        
+        for inputIndex in range(len(template['inputs'])): # For each input in the template...
+            for signatureIndex in range(len(template['inputs'][inputIndex]['signatures'])): # For each signature in the input...
+                address = template['inputs'][inputIndex]['signatures'][signatureIndex]['address'] # Get the address out of the template to make this code easier to read
+                if address in keyCollection: # if we have the private key needed for this signature..
+                    privateKeyBinary, compressed = keyCollection[address]
+                    privKey = CECKey() # This CECKey object type is from the python-bitcoinlib library
+                    privKey.set_secretbytes(privateKeyBinary)
+                    privKey.set_compressed(compressed)
+                    hash_to_sign = template['inputs'][inputIndex]['signatures'][signatureIndex]['hash_to_sign']
+                    signature = privKey.sign(hash_to_sign.decode('hex'))
+                    
+                    # We now have the signature. Let's put the signature and the pubkey into the template.
+                    template['inputs'][inputIndex]['signatures'][signatureIndex]['signature'] = signature.encode('hex')
+                    template['inputs'][inputIndex]['signatures'][signatureIndex]['public_key'] = privKey.get_pubkey().encode('hex')
+        return template
+    
+    def send(self,template):
+        URI = "https://" + self.keyID + ":" + self.keySecret + "@api.chain.com/" + APIVersion + "/" + self.blockChain + "/transactions/send"
+        templateString = json.dumps(template)
+        returnedData = request(URI, data=templateString, operation='POST')
         return json.loads(returnedData)
     

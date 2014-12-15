@@ -29,3 +29,26 @@ print chainClient.block() # The latest block
 # Returns the OP_RETURN value and associated addresses for all transactions in the block which contain an OP_RETURN output script.
 print chainClient.blockOP_RETURNs(hash="0000000000000000179c39d35c090b7da042ded43ad49b911843fb418a983de1")
 print chainClient.blockOP_RETURNs(height=308920)
+
+# Transaction building, signing, and sending:
+
+template = {'inputs':[{'address':"muZpTpBYhxmRFuCjLc7C6BBDF32C8XVJUi"}], 
+            'outputs':[{'address':'mmNokPYu68QMpomzEAweFDbuVSGHZDoo7X','amount':12345},
+                       {'address':'n2C2NkYDp2XS94eiuEdnmMxxMhW8LDNZHy','amount':678910}],
+            #'change_address':'n41hcnYquATYFGrAx2QvSaF9D8SLhbUX6f',
+            'miner_fee_rate':55777,
+            'min_confirmations':0
+            }
+
+template = chainClient.build(template)
+print "Built template:\n" + str(template)
+
+# The template is now built. We can sign it:
+
+#privateKeys = ['92FmWh2A6moe8RgNdqDeFjVaSrVBVxiQLQMaVKKimcZr8vRyQ14'] # corresponding address: mxurpXudoLffLYASFSNffb4CYBQbypa69d
+privateKeys = ['cVDJUtDjdaM25yNVVDLLX3hcHUfth4c7tY3rSc4hy9e8ibtCuj6G'] # corresponding address: muZpTpBYhxmRFuCjLc7C6BBDF32C8XVJUi - This is a compressed pubkey address.
+template = chainClient.sign(template,privateKeys)
+print "Template after signing:\n" + str(template)
+
+# Send the signed template:
+print chainClient.send(template)

@@ -3,6 +3,9 @@
 Chain's official Python SDK.
 
 ## Quick Start
+```bash
+pip install python-bitcoinlib
+```
 
 ```python
 from chain import Chain
