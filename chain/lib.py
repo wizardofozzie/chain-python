@@ -2,7 +2,7 @@ import json
 
 from bitcoin.core.key import CECKey
 
-from shared import request, generateKeyCollection, convertPrivateKeysToBinaryFormat
+from shared import request, generateKeyCollection, convertPrivateKeysToBinaryFormat, convertPrivateKeyToBinaryFormat, deriveAddress
 from chain import APIVersion
 
 
@@ -116,13 +116,16 @@ class Chain:
         return json.loads(returnedData)
     
     def sign(self,template, privateKeys):
+        
         # convert all of the privateKeys to a standard binary format for us to work with
         privateKeysBinary = convertPrivateKeysToBinaryFormat(privateKeys, self.blockChain)
         
-        # keyCollection is a dictionary where the key of the dict is an address and the value is a 
-        # tuple with (privKey, compressed)
-        #     where privKey is the key in binary format
-        #     and compressed is whether or not the corresponding pubkey should be compressed
+        """
+        keyCollection is a dictionary where the key of the dict is an address and the value is a 
+        tuple with (privKey, compressed)
+            where `privKey` is the private key in binary format
+            and `compressed` is a bool indicating whether or not the corresponding public key is compressed.
+        """
         keyCollection = generateKeyCollection(privateKeysBinary, self.blockChain) 
         
         if not 'inputs' in template:
@@ -149,4 +152,27 @@ class Chain:
         templateString = json.dumps(template)
         returnedData = request(URI, data=templateString, operation='POST')
         return json.loads(returnedData)
+    
+    def transact(self,template):
+        privateKeys = []
+        for inputIndex in range(len(template['inputs'])): # For each input in the template...
+            # copy the address and private_key out of the template to make this code easier to read.
+            address = template['inputs'][inputIndex]['address']
+            private_key = template['inputs'][inputIndex]['private_key']
+            privateKeyBinary, compressed = convertPrivateKeyToBinaryFormat(private_key, self.blockChain)
+            derivedAddress = deriveAddress(privateKeyBinary, compressed, self.blockChain)
+            if address != derivedAddress:
+                raise Exception("The address (%s) derived from the private_key in this input doesn't match the address that you gave (%s)." % (derivedAddress, address))
+            privateKeys.append(private_key)
+            del template['inputs'][inputIndex]['private_key'] # remove the private key from the template
+        
+        # At this point we have the privateKeys stored in the privateKeys list and 
+        # we know that they correspond correctly to the addresses in the template
+        builtTemplate = self.build(template)
+        if 'code' in builtTemplate:
+            # something went wrong
+            return builtTemplate
+        signedTemplate = self.sign(builtTemplate, privateKeys)
+        return self.send(signedTemplate)
+            
     

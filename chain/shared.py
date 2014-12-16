@@ -27,15 +27,25 @@ def convertPrivateKeysToBinaryFormat(privateKeys, blockChain):
     """
     privateKeysBinary = []
     for privateKey in privateKeys:
-        if len(privateKey) == 64: # if the key is in hex already.. 
-            # Assume that it is not for a compressed pubkey
-            privateKeysBinary.append((privateKey.decode('hex'), False))
-        else: # if the key is probably not in hex already then
-            # assume that the private key is in wallet-import-format and try to decode it.
-            # decodeWalletImportFormat will check the checksum and whatnot and throw exceptions
-            # if something seems wrong.
-            privateKeysBinary.append(decodeWalletImportFormat(privateKey, blockChain))
+        privateKeysBinary.append(convertPrivateKeyToBinaryFormat(privateKey, blockChain))
     return privateKeysBinary
+
+def convertPrivateKeyToBinaryFormat(privateKey, blockChain):
+    """
+    Accepts a single privateKey in either hex or WIF format.
+    Returns a single tuple where the tuple is (privKey, compressed)
+        where `privKey` is the private key in binary format
+        and `compressed` is a bool indicating whether or not the corresponding public key is compressed.
+    """
+    if len(privateKey) == 64: # if the key is in hex already.. 
+        # Assume that it is not for a compressed pubkey
+        return (privateKey.decode('hex'), False)
+    else: # if the key is probably not in hex already then
+        # assume that the private key is in wallet-import-format and try to decode it.
+        # decodeWalletImportFormat will check the checksum and whatnot and throw exceptions
+        # if something seems wrong.
+        return decodeWalletImportFormat(privateKey, blockChain)
+    
                                      
 def decodeWalletImportFormat(walletImportFormatString, blockChain):
     """
