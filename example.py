@@ -36,7 +36,7 @@ template = {'inputs':[{'address':"muZpTpBYhxmRFuCjLc7C6BBDF32C8XVJUi"}],
             'outputs':[{'address':'mmNokPYu68QMpomzEAweFDbuVSGHZDoo7X','amount':12345},
                        {'address':'n2C2NkYDp2XS94eiuEdnmMxxMhW8LDNZHy','amount':678910}],
             #'change_address':'n41hcnYquATYFGrAx2QvSaF9D8SLhbUX6f',
-            'miner_fee_rate':55777,
+            #'miner_fee_rate':55777, 
             'min_confirmations':0
             }
 
@@ -53,6 +53,10 @@ print "Template after signing:\n" + str(template)
 # Send the signed template:
 print chainClient.send(template)
 # All done!
+
+# If you want to send your own raw transaction, you can do that too:
+raw = "0100000001f5fe76d1ac4cea2c6aa84b09cb03a1285cbffef788d7a18893dbe4873cecc5a1000000008b483045022100ad4b975ccf6081574d8e1119dd6e4efc19c9f9af292d0b8613aa782fe4a4e53802207a67c701685d5f94e180a03141c4069d7fb371df8f2516cf6cb4e44484aa4c60014104211ff0847051e57139d60a4bdc0ff6d8dfaed4dce4c4927eec69b6f583b99a007c0987fa7ec11af9a33c7ce1e70f30a36b6235c4071e4b993223afa76786898effffffff0230517d01000000001976a914bc65f5d30afd0299f769f87737d99e5c3973938a88ac40787d01000000001976a91462032ad95797e5f7dc0fba7321dcffce787da3a488ac00000000"
+print chainClient.send(raw) 
 
 # We can do the building, signing, and sending all in one step:
 
@@ -71,7 +75,7 @@ template = {'inputs':[
                        {'address':'n2C2NkYDp2XS94eiuEdnmMxxMhW8LDNZHy','amount':89987}
                       ],
             #'change_address':'n41hcnYquATYFGrAx2QvSaF9D8SLhbUX6f',
-            'miner_fee_rate':55777,
+            #'miner_fee_rate':55777,
             'min_confirmations':0
             }
 print chainClient.transact(template)

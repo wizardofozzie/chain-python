@@ -147,9 +147,11 @@ class Chain:
                     template['inputs'][inputIndex]['signatures'][signatureIndex]['public_key'] = privKey.get_pubkey().encode('hex')
         return template
     
-    def send(self,template):
+    def send(self,data):
+        if type(data) == str:
+            data = {'signed_hex': data}
         URI = "https://" + self.keyID + ":" + self.keySecret + "@api.chain.com/" + APIVersion + "/" + self.blockChain + "/transactions/send"
-        templateString = json.dumps(template)
+        templateString = json.dumps(data)
         returnedData = request(URI, data=templateString, operation='POST')
         return json.loads(returnedData)
     
