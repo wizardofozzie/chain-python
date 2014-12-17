@@ -79,3 +79,17 @@ template = {'inputs':[
             'min_confirmations':0
             }
 print chainClient.transact(template)
+
+
+# Spend money from a P2SH multi-sig address. This example address (2NFgLo...) was set up as a 2-of-3 address. 
+# When you generate the address, you must keep the redeem script. Two private keys for this example are below. 
+
+template = {'inputs':[{'address':"2NFgLoTgMcBNjYN2ucLDKhkjY4Nkiyf3rVC", 'redeem_script':'5221021301dd15ebbd3e7010369e8109e224b40e18d57dd0aa676b0d80fb25f252482221033a97afb6565ea422a7a1b256f00ca537c702065774f8d5bdb060975afbe66d922103c2860f0c8f13053ed51aa02e8f4769a6c067660684982c6b07f7f147ddb7440d53ae'}], 
+            'outputs':[{'address':'mpTCJvhpgantkp4AhauLyFeNDvLTQEeNE2','amount':16000000}],
+            'miner_fee_rate':0,
+            'min_confirmations':0
+            }
+template = chainClient.build(template)
+privateKeys = ['cNUN9j5cJXePrrRYSM1o9vPST1d8aHTPjbuSKSDysZGsQHer3XzQ', 'cNqFo95cmckAH6MEkjEfHt2V5kK43dnsDDv4vtKDJqp3n86fo6Yj']
+template = chainClient.sign(template,privateKeys)
+print "Template after signing:\n" + str(template)
