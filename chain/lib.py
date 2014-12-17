@@ -129,7 +129,7 @@ class Chain:
         keyCollection = generateKeyCollection(privateKeysBinary, self.blockChain) 
         
         if not 'inputs' in template:
-            raise Exception("This template has no inputs. There is nothing so sign.")
+            raise Exception("This template has no inputs. There is nothing to sign.")
         
         for inputIndex in range(len(template['inputs'])): # For each input in the template...
             for signatureIndex in range(len(template['inputs'][inputIndex]['signatures'])): # For each signature in the input...
