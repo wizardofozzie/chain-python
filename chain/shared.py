@@ -6,7 +6,7 @@ import arithmetic
 
 def request(URI, operation='GET', data=""):
     headers = {
-        'User-Agent': "chain-python " + SDKVersion,
+        'User-Agent': "chain-python v" + SDKVersion,
         'Accept-Encoding': 'GZIP',
         'Content-Type': 'application/json',
         'Accept': '*/*'
