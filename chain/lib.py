@@ -1,9 +1,12 @@
+from __future__ import absolute_import
 import json
 
 from bitcoin.core.key import CECKey
 
-from shared import request, generateKeyCollection, convertPrivateKeysToBinaryFormat, convertPrivateKeyToBinaryFormat, deriveAddress
+from .shared import request, generateKeyCollection, convertPrivateKeysToBinaryFormat, convertPrivateKeyToBinaryFormat, deriveAddress
 from chain import APIVersion
+from six.moves import range
+from binascii import hexlify, unhexlify
 
 
 class Chain:
@@ -122,11 +125,11 @@ class Chain:
                     privKey.set_secretbytes(privateKeyBinary)
                     privKey.set_compressed(compressed)
                     hash_to_sign = template['inputs'][inputIndex]['signatures'][signatureIndex]['hash_to_sign']
-                    signature = privKey.sign(hash_to_sign.decode('hex'))
+                    signature = privKey.sign(unhexlify(hash_to_sign))
                     
                     # We now have the signature. Let's put the signature and the pubkey into the template.
-                    template['inputs'][inputIndex]['signatures'][signatureIndex]['signature'] = signature.encode('hex')
-                    template['inputs'][inputIndex]['signatures'][signatureIndex]['public_key'] = privKey.get_pubkey().encode('hex')
+                    template['inputs'][inputIndex]['signatures'][signatureIndex]['signature'] = hexlify(signature).decode('ascii')
+                    template['inputs'][inputIndex]['signatures'][signatureIndex]['public_key'] = hexlify(privKey.get_pubkey()).decode('ascii')
         return template
     
     def send(self,data):
@@ -143,6 +146,7 @@ class Chain:
             # copy the address and private_key out of the template to make this code easier to read.
             address = template['inputs'][inputIndex]['address']
             private_key = template['inputs'][inputIndex]['private_key']
+            
             privateKeyBinary, compressed = convertPrivateKeyToBinaryFormat(private_key, self.blockChain)
             derivedAddress = deriveAddress(privateKeyBinary, compressed, self.blockChain)
             if address != derivedAddress:

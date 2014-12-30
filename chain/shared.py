@@ -1,8 +1,10 @@
+from __future__ import absolute_import
 from chain import SDKVersion
 import requests
 from bitcoin.core.key import CECKey
+from bitcoin.base58 import decode, encode
 import hashlib
-import arithmetic
+from binascii import unhexlify
 
 def request(URI, operation='GET', data=""):
     headers = {
@@ -39,7 +41,7 @@ def convertPrivateKeyToBinaryFormat(privateKey, blockChain):
     """
     if len(privateKey) == 64: # if the key is in hex already.. 
         # Assume that it is not for a compressed pubkey
-        return (privateKey.decode('hex'), False)
+        return (unhexlify(privateKey), False)
     else: # if the key is probably not in hex already then
         # assume that the private key is in wallet-import-format and try to decode it.
         # decodeWalletImportFormat will check the checksum and whatnot and throw exceptions
@@ -55,7 +57,7 @@ def decodeWalletImportFormat(walletImportFormatString, blockChain):
         
     This function currently supports bitcoin mainnet and testnet.
     """
-    fullString = arithmetic.changebase(walletImportFormatString, 58, 256) # decode base58 to binary
+    fullString = decode(walletImportFormatString)
     privkey = fullString[:-4]
     if fullString[-4:] != hashlib.sha256(hashlib.sha256(privkey).digest()).digest()[:4]:
         raise Exception("When trying to decode one of your private keys, the wallet-import-format checksum was wrong.")
@@ -66,7 +68,7 @@ def decodeWalletImportFormat(walletImportFormatString, blockChain):
     # https://en.bitcoin.it/wiki/Wallet_import_format
     
     if blockChain == 'bitcoin':
-        if privkey[0] != '\x80': # If the first byte isn't hex 80
+        if privkey[0:1] != b'\x80': # If the first byte isn't hex 80
             raise Exception("When trying to decode one of your private keys, the checksum passed but the key doesn\'t begin with hex 80.")
         # The first character must be a 5 for uncompressed keys OR K or L for compressed keys
         if walletImportFormatString[0] == "5":
@@ -74,21 +76,21 @@ def decodeWalletImportFormat(walletImportFormatString, blockChain):
         elif walletImportFormatString[0] in ["K","L"]:
             compressed = True
             # We need to drop the last byte which should be \x01
-            if privkey[-1:] != '\x01':
+            if privkey[33:34] != b'\x01':
                 raise Exception("Your decoded compressed WIF key did not end with a \x01 byte.")
             privkey = privkey[:-1]
         else:
             raise Exception("In mainnet mode, the private key must start with 5, K, or L. Or it must be in Hex.")
         return (privkey[1:], compressed)
     elif blockChain.startswith('testnet'):
-        if privkey[0] != '\xef':
+        if privkey[0:1] != b'\xEF':
             raise Exception("When trying to decode one of your private keys, the checksum passed but the key doesn\'t begin with hex EF.")
         if walletImportFormatString[0] == "9":
             compressed = False
         elif walletImportFormatString[0] == "c":
             compressed = True
             # We need to drop the last byte which should be \x01
-            if privkey[-1:] != '\x01':
+            if privkey[33:34] != b'\x01':
                 raise Exception("Your decoded compressed WIF key did not end with a \x01 byte.")
             privkey = privkey[:-1]
         else:
@@ -133,9 +135,9 @@ def deriveAddress(privateKey, compressed, blockChain):
     ripe = ripemd160.digest()
 
     if blockChain == 'bitcoin':
-        ripeWithNetworkPrefix = '\x00' + ripe
+        ripeWithNetworkPrefix = b'\x00' + ripe
     elif blockChain.startswith('testnet'):
-        ripeWithNetworkPrefix = '\x6F' + ripe
+        ripeWithNetworkPrefix = b'\x6F' + ripe
     else: 
         raise Exception("'blockChain' parameter is not set correctly")
 
@@ -143,9 +145,9 @@ def deriveAddress(privateKey, compressed, blockChain):
         ripeWithNetworkPrefix).digest()).digest()[:4]
     binaryBitcoinAddress = ripeWithNetworkPrefix + checksum
     numberOfZeroBytesOnBinaryBitcoinAddress = 0
-    while binaryBitcoinAddress[0] == '\x00': # while the first byte is null
+    while binaryBitcoinAddress[0:1] == b'\x00': # while the first byte is null
         numberOfZeroBytesOnBinaryBitcoinAddress += 1
         binaryBitcoinAddress = binaryBitcoinAddress[1:] # take off the first byte
-    base58encoded = arithmetic.changebase(binaryBitcoinAddress, 256, 58)
+    base58encoded = encode(binaryBitcoinAddress) # encode into base58
     return "1" * numberOfZeroBytesOnBinaryBitcoinAddress + base58encoded
         
