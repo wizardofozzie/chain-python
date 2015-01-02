@@ -13,7 +13,8 @@ setup(
     long_description='',
     install_requires=[
         "requests >= 2.4.3",
-        "python-bitcoinlib >= 0.2.1"
+        "python-bitcoinlib >= 0.2.1",
+        "six >= 1.5.2"
     ],
     classifiers=[
         'Programming Language :: Python :: 2',
