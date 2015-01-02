@@ -8,9 +8,9 @@ setup(
     packages=['chain'],
     url='https://github.com/chain-engineering/chain-python',
     keywords='bitcoin',
-    license='LICENSE',
+    license='MIT',
     description='Official Python software development kit for the Chain.com API',
-    long_description='Official Python software development kit for the Chain.com API',
+    long_description='',
     install_requires=[
         "requests >= 2.4.3",
         "python-bitcoinlib >= 0.2.1"
