@@ -4,7 +4,7 @@ Chain's official Python SDK.
 
 ## Quick Start
 ```bash
-pip install python-bitcoinlib requests
+pip install chain-sdk
 ```
 
 ```python

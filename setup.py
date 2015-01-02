@@ -1,12 +1,12 @@
 from setuptools import setup
 
 setup(
-    name='chain-python',
+    name='chain-sdk',
     version='1.0',
     author='Jonathan Warren',
     author_email='jonathan@coinapex.com',
     packages=['chain'],
-    url='http://pypi.python.org/pypi/chain-python/',
+    url='https://github.com/chain-engineering/chain-python',
     keywords='bitcoin',
     license='LICENSE',
     description='Official Python software development kit for the Chain.com API',
