@@ -69,7 +69,7 @@ def decodeWalletImportFormat(walletImportFormatString, blockChain):
     
     if blockChain == 'bitcoin':
         if privkey[0:1] != b'\x80': # If the first byte isn't hex 80
-            raise Exception("When trying to decode one of your private keys, the checksum passed but the key doesn\'t begin with hex 80.")
+            raise Exception("When trying to decode one of your private keys, the checksum passed but the key doesn\'t begin with hex 80. You are using the 'bitcoin' blockChain. Perhaps you meant to use testnet?")
         # The first character must be a 5 for uncompressed keys OR K or L for compressed keys
         if walletImportFormatString[0] == "5":
             compressed = False
@@ -84,7 +84,7 @@ def decodeWalletImportFormat(walletImportFormatString, blockChain):
         return (privkey[1:], compressed)
     elif blockChain.startswith('testnet'):
         if privkey[0:1] != b'\xEF':
-            raise Exception("When trying to decode one of your private keys, the checksum passed but the key doesn\'t begin with hex EF.")
+            raise Exception("When trying to decode one of your private keys, the checksum passed but the key doesn\'t begin with hex EF. You are using a 'testnet' blockChain. Perhaps you meant to use the 'bitcoin' blockChain?")
         if walletImportFormatString[0] == "9":
             compressed = False
         elif walletImportFormatString[0] == "c":

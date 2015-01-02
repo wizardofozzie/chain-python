@@ -16,6 +16,8 @@ chainClient = Chain(keyID='5587496846848',
 print chainClient.addressBalance("17x23dNjXJLzGMev6R63uyRhMWP1VHawKc")
 ```
 
+See many more examples [here](https://github.com/chain-engineering/chain-python/blob/master/bin/example.py).
+
 ## Documentation
 
 The Chain API Documentation is available at [https://chain.com/docs/python](https://chain.com/docs/python)
